@@ -1,5 +1,5 @@
 import { db } from "../index.js";
-import { NewUser, users } from "../schema.js";
+import { NewUser, refreshTokens, users, User } from "../schema.js";
 import { eq } from "drizzle-orm";
 
 export async function createUser(user: NewUser) {
@@ -20,5 +20,17 @@ export async function getUserByEmail(email: string) {
     .select()
     .from(users)
     .where(eq(users.email, email));
+  return result;
+}
+
+export async function updateUserEmailPassword(id: string, email: string, hashedPassword: string) {
+  const [result] = await db.update(users)
+    .set({hashedPassword: hashedPassword,
+          email: email,
+          updatedAt: new Date(),
+    })
+    .where(eq(users.id, id))
+    .returning();
+
   return result;
 }

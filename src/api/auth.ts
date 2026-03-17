@@ -1,11 +1,12 @@
 import { getUserByEmail } from "../db/queries/users.js";
-import { checkPasswordHash, makeJWT } from "../auth.js";
+import { checkPasswordHash, getBearerToken, makeJWT, makeRefreshToken } from "../auth.js";
 import { respondWithJSON } from "./json.js";
 import { UserNotAuthenticatedError } from "./errors.js";
 
 import type { Request, Response } from "express";
 import type { UserResponse } from "./users.js";
 import { config } from "../config.js";
+import { revokeRefreshToken, saveRefreshToken, userForRefreshToken } from "../db/queries/refresh.js";
 
 type LoginResponse = UserResponse & {
   token: string;
@@ -38,7 +39,12 @@ export async function handlerLogin(req: Request, res: Response) {
   }
 
   const token = makeJWT(user.id, params.expiresInSeconds=config.jwt.defaultDuration, config.jwt.secret)
-
+  const refreshToken = makeRefreshToken();
+  console.log(`refreshtoken: ${refreshToken}`)
+  const saved = await saveRefreshToken(user.id, refreshToken);
+  if (!saved) {
+    throw new UserNotAuthenticatedError("could not save refresh token");
+  }
 
   respondWithJSON(res, 200, {
     id: user.id,
@@ -46,5 +52,36 @@ export async function handlerLogin(req: Request, res: Response) {
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
     token: token,
+    refreshToken: refreshToken,
   });
+}
+
+export async function handlerRefresh(req: Request, res: Response) {
+  const refreshToken = getBearerToken(req);
+
+  const result = await userForRefreshToken(refreshToken);
+  if (!result) {
+    throw new UserNotAuthenticatedError("invalid refresh token");
+  }
+
+  const user = result.user;
+  const accessToken = makeJWT(
+    user.id,
+    config.jwt.defaultDuration,
+    config.jwt.secret,
+  );
+
+  type response = {
+    token: string;
+  };
+
+  respondWithJSON(res, 200, {
+    token: accessToken,
+  } satisfies response);
+}
+
+export async function handlerRevoke(req: Request, res: Response) {
+  const refreshToken = getBearerToken(req);
+  await revokeRefreshToken(refreshToken);
+  res.status(204).send();
 }
