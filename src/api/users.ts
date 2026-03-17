@@ -18,7 +18,7 @@ export async function handlerUsersCreate(req: Request, res: Response) {
   const params: parameters = req.body;
 
   const hashedPassword = await hashPassword(params.password);
-  console.log(`password hash: ${hashedPassword}`);
+  //console.log(`password hash: ${hashedPassword}`);
 
 
   if (!params.email) {

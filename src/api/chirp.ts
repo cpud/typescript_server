@@ -1,16 +1,29 @@
 import type { Request, Response } from "express";
 
 import { respondWithJSON } from "./json.js";
-import { BadRequestError } from "./errors.js";
+import { BadRequestError, UserNotAuthenticatedError } from "./errors.js";
 import { NewChirp, GetChirp } from "../db/schema.js";
 import { createChirp, getChirp, getChirps } from "../db/queries/chirp.js";
 import { NotFoundError } from "./errors.js";
+import { getBearerToken, validateJWT } from "../auth.js";
+import { config } from "../config.js";
 
 export async function handlerChirpsCreate(req: Request, res: Response) {
   type parameters = {
     body: string;
     userId: string
   };
+
+  const token = getBearerToken(req);
+
+  if (!token) {
+    throw new UserNotAuthenticatedError("invalid token");
+  }
+
+  const userId = validateJWT(token, config.jwt.secret);
+  if (!userId) {
+    throw new UserNotAuthenticatedError("invalid token");
+  }
 
   const params: parameters = req.body;
 
@@ -36,7 +49,8 @@ export async function handlerChirpsCreate(req: Request, res: Response) {
 
   const newChirp: NewChirp = {
     body: cleaned,
-    userId: params.userId,
+    //userId: params.userId,
+    userId: userId,
   }
 
   const chirp = await createChirp(newChirp);
