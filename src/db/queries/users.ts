@@ -34,3 +34,14 @@ export async function updateUserEmailPassword(id: string, email: string, hashedP
 
   return result;
 }
+
+export async function makeUserRedById(userId: string) {
+  const [result] = await db.update(users)
+    .set({
+      isChirpyRed: true,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, userId))
+    .returning();
+  return result;
+}

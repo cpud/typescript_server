@@ -40,7 +40,6 @@ export async function handlerLogin(req: Request, res: Response) {
 
   const token = makeJWT(user.id, params.expiresInSeconds=config.jwt.defaultDuration, config.jwt.secret)
   const refreshToken = makeRefreshToken();
-  console.log(`refreshtoken: ${refreshToken}`)
   const saved = await saveRefreshToken(user.id, refreshToken);
   if (!saved) {
     throw new UserNotAuthenticatedError("could not save refresh token");
@@ -53,6 +52,7 @@ export async function handlerLogin(req: Request, res: Response) {
     updatedAt: user.updatedAt,
     token: token,
     refreshToken: refreshToken,
+    isChirpyRed: user.isChirpyRed,
   });
 }
 

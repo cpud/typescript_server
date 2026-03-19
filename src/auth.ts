@@ -80,3 +80,16 @@ export function makeRefreshToken() {
   const hexString = crypto.randomBytes(32).toString('hex');
   return hexString;
 }
+
+export function getAPIKey(req: Request) {
+  const authHeader = req.get("Authorization");
+  if (!authHeader) {
+    throw new UserNotAuthenticatedError("malformed authorization header");
+  }
+  const splitAuth = authHeader.split(" ");
+  //console.log(`splitAuth: ${splitAuth}`);
+  if (splitAuth.length < 2 || splitAuth[0] !== "ApiKey") {
+    throw new BadRequestError("here in splitAuth");
+  }
+  return splitAuth[1];
+}

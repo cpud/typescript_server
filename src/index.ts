@@ -20,6 +20,7 @@ import {
 import { handlerUpdateEmailPassword, handlerUsersCreate } from "./api/users.js";
 import { handlerChirpsCreate, handlerChirpsGet, handlerChirpGetById, handlerDeleteChirp } from "./api/chirp.js";
 import { handlerLogin, handlerRefresh, handlerRevoke } from "./api/auth.js";
+import { handlerPolkaRed } from "./api/polka.js";
 
 const app = express();
 const PORT = 8080;
@@ -77,6 +78,10 @@ app.post("/api/revoke", (req, res, next) => {
 
 app.put("/api/users", (req, res, next) => {
   Promise.resolve(handlerUpdateEmailPassword(req, res)).catch(next);
+})
+
+app.post("/api/polka/webhooks", (req, res, next) => {
+  Promise.resolve(handlerPolkaRed(req,res).catch(next));
 })
 
 app.use(errorMiddleWare);

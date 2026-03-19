@@ -43,6 +43,7 @@ export async function handlerUsersCreate(req: Request, res: Response) {
     email: user.email,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
+    isChirpyRed: user.isChirpyRed,
   });
 }
 
@@ -72,7 +73,8 @@ export async function handlerUpdateEmailPassword(req: Request, res: Response) {
     id: update.id,
     email: update.email,
     createdAt: update.createdAt,
-    updatedAt: update.updatedAt
+    updatedAt: update.updatedAt,
+    isChirpyRed: update.isChirpyRed,
   });
 
 }
