@@ -48,7 +48,8 @@ app.post("/api/chirps", (req, res, next) => {
   Promise.resolve(handlerChirpsCreate(req, res).catch(next));
 })
 
-app.get("/api/chirps", (req, res, next) => {
+//app.get("/api/chirps/:authorId?", (req, res, next) => {
+app.get("/api/chirps/", (req, res, next) => {
   Promise.resolve(handlerChirpsGet(req, res).catch(next));
 })
 
